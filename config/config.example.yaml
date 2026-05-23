@@ -1,0 +1,68 @@
+# ─── Senso Agent Runtime Configuration ───
+# Copy this file to config.yaml and fill in your values.
+
+llm:
+  backup:
+    type: "qwen"
+    # Get your key: https://dashscope.console.aliyun.com/apiKey
+    api_key: "sk-YOUR-DASHSCOPE-KEY-HERE"
+    # Options: qwen2.5-72b-instruct, qwen2.5-32b-instruct, qwen3-6b
+    model: "qwen2.5-72b-instruct"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+agent:
+  id: "laptop-primary"      # Unique ID per laptop
+  role: "primary"           # "primary" or "failover"
+
+shell: "powershell"          # "powershell" | "cmd" | "bash"
+
+limits:
+  max_turns: 20              # Max command rounds per user query
+  max_command_length: 2000
+
+guardrails:
+  command_whitelist:
+    allow:
+      # Add your custom allow patterns here (on top of defaults)
+      # - "^custom-cmd\s"
+      - "^Get-"
+      - "^Test-"
+      - "^systeminfo$"
+    deny:
+      # Add custom deny patterns here
+      - ".*Remove-Item.*"
+  timeouts:
+    default_seconds: 30
+    max_seconds: 300
+    per_command:
+      ping: 15
+      tracert: 30
+      systeminfo: 60
+      docker: 120
+      pip: 120
+      npm: 120
+      npx: 120
+      git: 60
+  sanitization:
+    strip_patterns:
+      - "(?i)password[\\s=:]+['\\\"]?\\S+"
+      - "(?i)api[_\\-]?key[\\s=:]+['\\\"]?\\S+"
+      - "(?i)token[\\s=:]+['\\\"]?\\S+"
+      - "(?i)secret[\\s=:]+['\\\"]?\\S+"
+      - "(?i)Bearer\\s+\\S+"
+  approval:
+    mode: "prompt"           # "prompt" = ask user, "auto" = auto-approve, "deny" = block all
+    auto_approve_patterns:
+      - "^Get-Process$"
+      - "^whoami$"
+      - "^dir\\s"
+      - "^ls\\s"
+
+siem:
+  enabled: true
+  log_file: "logs/audit.jsonl"
+  syslog:
+    enabled: false
+    host: "localhost"
+    port: 514
+    protocol: "UDP"          # "UDP" or "TCP"

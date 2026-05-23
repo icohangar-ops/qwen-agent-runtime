@@ -1,0 +1,29 @@
+[project]
+name = "senso-agent-runtime"
+version = "1.0.0"
+description = "Secure local agent runtime with Qwen backup LLM and LangChain ShellTool"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+dependencies = [
+    "langchain>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "openai>=1.40.0",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+    "prompt-toolkit>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+syslog = [
+    "pysyslogclient>=1.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
