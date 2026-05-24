@@ -26,8 +26,8 @@ console = Console()
 BANNER = r"""
 [bold cyan]
   ╔══════════════════════════════════════════╗
-  ║       Senso Agent Runtime v1.0           ║
-  ║   Qwen-Powered Local Shell Agent        ║
+  ║       Senso Agent Runtime v1.1           ║
+  ║   Groq-Powered Local Shell Agent        ║
   ╚══════════════════════════════════════════╝
 [/bold cyan]
 """
@@ -302,9 +302,11 @@ def chat_loop():
         # Feed results back to LLM for analysis if commands were run
         if commands and all_output:
             messages.append({"role": "assistant", "content": ai_text})
+            # Truncate output to stay within token limits (roughly 6000 chars ~ 2000 tokens)
+            truncated = all_output[:6000] + "...\n[output truncated]" if len(all_output) > 6000 else all_output
             messages.append({
                 "role": "user",
-                "content": f"Command outputs:\n{all_output}\n\nPlease analyze the results and respond.",
+                "content": f"Command outputs:\n{truncated}\n\nPlease analyze the results and respond.",
             })
 
             try:
