@@ -1,0 +1,242 @@
+.docname {Senso Agent Runtime}
+.docdescription {AI-Powered Shell Command Execution with Guardrails}
+.doctype {slides}
+.doclang {English}
+
+.docauthors
+  - cubiczan
+
+# Senso Agent Runtime
+
+AI-Powered Shell Command Execution with Guardrails
+
+---
+
+# The Problem
+
+System administration requires deep knowledge of CLI tools, syntax flags, and platform-specific commands.
+
+Operators face three constant challenges:
+
+1. **Command recall** - remembering exact syntax for hundreds of tools
+2. **Cross-platform gaps** - macOS vs Windows vs Linux differences
+3. **Error recovery** - diagnosing and fixing failed commands
+
+> What if you could just describe what you want in plain English?
+
+---
+
+# The Solution
+
+Senso Agent Runtime bridges natural language and shell execution through LLM-powered command generation.
+
+Each node runs a simple loop:
+
+1. User types a request in plain English
+2. LLM generates the appropriate shell command
+3. Operator reviews and approves (Y / N / E)
+4. Command executes locally
+5. Output is analyzed and explained
+
+```python
+import openai, yaml, subprocess
+
+while True:
+    prompt = input("You > ")
+    command = llm.generate(prompt)
+    if confirm(command):
+        result = execute(command)
+        print(llm.analyze(result))
+```
+
+---
+
+# Architecture Overview
+
+Three nodes across two platforms, each running independently:
+
+**Laptop 1 (Primary)**
+- Groq LLM (Llama 3.3 70B)
+- PowerShell
+- Agent ID: laptop-primary
+
+**Laptop 2 (Failover)**
+- Groq LLM (Llama 3.3 70B)
+- PowerShell
+- Agent ID: laptop-failover
+
+**Mac Server**
+- DeepSeek (deepseek-chat)
+- Bash
+- Agent ID: mac-server
+
+---
+
+# LLM Providers
+
+Two providers ensure geographic and cost resilience:
+
+**Groq Cloud**
+
+- Model: Llama 3.3 70B Versatile
+- Endpoint: api.groq.com/openai/v1
+- Strengths: Fast inference, free tier
+- Limitation: Blocked from cloud servers
+- Deployed on: Both Windows laptops
+
+**DeepSeek**
+
+- Model: deepseek-chat
+- Endpoint: api.deepseek.com
+- Strengths: No geo-blocks, strong reasoning
+- Free tier available
+- Deployed on: Mac server
+
+---
+
+# Guardrails System
+
+Every generated command passes through safety checks before reaching the shell:
+
+1. **Natural language input** - User describes intent
+2. **LLM generates command** - OpenAI-compatible API call
+3. **Guardrail: deny-list check** - Pattern matching against blocked commands
+4. **Guardrail: regex validation** - Dangerous pattern detection
+5. **User approval (Y/N/E)** - Final human checkpoint
+6. **Shell execution** - Local subprocess run
+7. **Output analysis** - LLM explains results
+
+> Important: Blocking patterns include rm -rf /, format, destructive registry edits, and any command flagged by the deny-list configuration.
+
+---
+
+# PowerShell Integration
+
+19 community modules bootstrap the Windows laptops into full admin workstations:
+
+**PSFzf** - Fuzzy finder
+**posh-git** - Git prompt
+**oh-my-posh** - Themes
+**Terminal-Icons** - Icons
+**z** - Directory jumper
+**PSColor** - Colorized output
+**InvokeBuild** - Build automation
+**ThreadJob** - Concurrent jobs
+**PSPKI** - Certificate mgmt
+**Carbon** - System admin
+**DSInternals** - AD forensics
+**Pode** - Web server
+**PSScriptAnalyzer** - Linting
+**BurntToast** - Notifications
+**PSWindowsUpdate** - Updates
+
+Automated via bootstrap_awesome_ps.ps1 with Scoop + fzf prereq handling.
+
+---
+
+# Output Intelligence
+
+Large command outputs are intelligently managed to prevent token limit errors:
+
+```python
+MAX_OUTPUT_FOR_LLM = 8000
+
+if len(raw_output) > MAX_OUTPUT_FOR_LLM:
+    truncated = raw_output[:MAX_OUTPUT_FOR_LLM] + "\n... [truncated]"
+    analysis = llm.analyze(truncated)
+else:
+    analysis = llm.analyze(raw_output)
+```
+
+This prevents Groq 413 errors (12K TPM limit) while preserving the most relevant output for analysis.
+
+---
+
+# The Chat Loop
+
+A live interaction example:
+
+1. You type: "show me top 10 processes"
+2. LLM generates: `Get-Process | Sort-Object CPU -Descending | Select-Object -First 10`
+3. Approve? **Y**
+4. Command executes locally
+5. LLM analyzes the output
+6. Returns: "Here are the top 10 CPU-consuming processes..."
+
+Three approval modes:
+- **Y** - Execute the command
+- **N** - Reject and re-prompt
+- **E** - Edit the command manually before executing
+
+---
+
+# Repository Structure
+
+```
+qwen-agent-runtime/
+  agent/
+    __main__.py      # Entry point, chat loop
+    core.py           # LLM initialization
+    guardrails.py     # Safety checks
+    executor.py       # Command execution
+  config/
+    config.yaml       # LLM keys, agent ID, shell
+  scripts/
+    bootstrap_awesome_ps.ps1  # Module installer
+  presentation/
+    main.qd           # This presentation
+  README.md
+```
+
+Python 3.10+ required. OpenAI SDK for LLM communication.
+
+---
+
+# Roadmap
+
+**Completed**
+
+- Phase 1: Multi-node runtime (3 nodes live)
+- Phase 2: PowerShell toolkit (18/19 modules)
+
+**In Progress**
+
+- Phase 3: Encrypted agent-to-agent communication
+- Phase 4: Knowledge base integration (Senso.AI)
+- Phase 5: Web dashboard for monitoring
+
+**Planned**
+
+- Phase 6: Autonomous remediation workflows
+- Phase 7: Custom function plugins
+
+---
+
+# Get Started
+
+```bash
+# Clone
+git clone https://codeberg.org/cubiczan/qwen-agent-runtime.git
+cd qwen-agent-runtime
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure your LLM key and agent ID
+notepad config/config.yaml
+
+# Run
+python -m agent
+```
+
+> Important: The agent runs locally. Commands execute locally. Your API keys stay on your machine.
+
+---
+
+# Questions?
+
+Senso Agent Runtime
+
+Three nodes. Two LLM providers. One unified runtime.
+
+[Codeberg](https://codeberg.org/cubiczan/qwen-agent-runtime) | [GitHub](https://github.com/Cubiczan/qwen-agent-runtime)
