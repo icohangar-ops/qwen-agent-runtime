@@ -1,0 +1,189 @@
+# Senso Agent Runtime - Repository Map
+# Generated with D2 (https://d2lang.com)
+
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 6
+    pad: 30
+  }
+}
+
+direction: right
+
+root: {
+  label: qwen-agent-runtime
+  shape: rectangle
+  style: {
+    fill: "#2c3e50"
+    stroke: "#1a252f"
+    font-color: white
+    bold: true
+    font-size: 18
+    border-radius: 8
+  }
+}
+
+agent_pkg: {
+  label: agent/
+  shape: package
+  style: {
+    fill: "#3498db"
+    stroke: "#2980b9"
+    font-color: white
+    bold: true
+  }
+
+  main: {
+    label: __main__.py\nChat loop, I/O\nOutput truncation
+    shape: page
+    style: {
+      fill: "#d5f5e3"
+      stroke: "#27ae60"
+    }
+  }
+
+  core: {
+    label: core.py\nLLM init\nOpenAI SDK
+    shape: page
+    style: {
+      fill: "#d5f5e3"
+      stroke: "#27ae60"
+    }
+  }
+
+  guardrails: {
+    label: guardrails.py\nDeny-list\nRegex patterns
+    shape: page
+    style: {
+      fill: "#fadbd8"
+      stroke: "#e74c3c"
+    }
+  }
+
+  executor: {
+    label: executor.py\nsubprocess.run()\nShell execution
+    shape: page
+    style: {
+      fill: "#fadbd8"
+      stroke: "#e74c3c"
+    }
+  }
+}
+
+config_dir: {
+  label: config/
+  shape: queue
+  style: {
+    fill: "#f39c12"
+    stroke: "#e67e22"
+    font-color: white
+    bold: true
+  }
+
+  yaml: {
+    label: config.yaml\napi_key\nmodel, base_url\nagent.id\nshell type
+    shape: document
+    style: {
+      fill: "#fef9e7"
+      stroke: "#f39c12"
+    }
+  }
+}
+
+scripts_dir: {
+  label: scripts/
+  shape: queue
+  style: {
+    fill: "#f39c12"
+    stroke: "#e67e22"
+    font-color: white
+    bold: true
+  }
+
+  bootstrap: {
+    label: bootstrap_awesome_ps.ps1\n19 PS modules\nScoop + fzf prereq
+    shape: page
+    style: {
+      fill: "#ebf5fb"
+      stroke: "#3498db"
+    }
+  }
+}
+
+presentation_dir: {
+  label: presentation/
+  shape: queue
+  style: {
+    fill: "#f39c12"
+    stroke: "#e67e22"
+    font-color: white
+    bold: true
+  }
+
+  qd: {
+    label: main.qd\nQuarkdown slides\n13 slides
+    shape: page
+    style: {
+      fill: "#f5eef8"
+      stroke: "#9b59b6"
+    }
+  }
+}
+
+docs_dir: {
+  label: docs/
+  shape: queue
+  style: {
+    fill: "#f39c12"
+    stroke: "#e67e22"
+    font-color: white
+    bold: true
+  }
+
+  diagrams: {
+    label: diagrams/\nD2 architecture\nChat loop flow\nRepo map
+    shape: page
+    style: {
+      fill: "#eaf2f8"
+      stroke: "#5dade2"
+    }
+  }
+}
+
+readme: {
+  label: README.md\nSetup guide\nArchitecture docs
+  shape: document
+  style: {
+    fill: "#f8f9fa"
+    stroke: "#adb5bd"
+  }
+}
+
+requirements: {
+  label: requirements.txt\nopenai\npyyaml
+  shape: document
+  style: {
+    fill: "#f8f9fa"
+    stroke: "#adb5bd"
+  }
+}
+
+# Connections
+root -> agent_pkg
+root -> config_dir
+root -> scripts_dir
+root -> presentation_dir
+root -> docs_dir
+root -> readme
+root -> requirements
+
+agent_pkg -> main
+agent_pkg -> core
+agent_pkg -> guardrails
+agent_pkg -> executor
+
+config_dir -> yaml
+scripts_dir -> bootstrap
+presentation_dir -> qd
+docs_dir -> diagrams

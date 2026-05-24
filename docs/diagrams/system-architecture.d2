@@ -1,0 +1,289 @@
+# Senso Agent Runtime - System Architecture
+# Generated with D2 (https://d2lang.com)
+
+direction: down
+
+vars: {
+  d2-config: {
+    layout-engine: dagre
+    theme-id: 101
+    sketch: false
+    pad: 30
+  }
+}
+
+# Title
+title: {
+  label: Senso Agent Runtime\nSystem Architecture
+  shape: text
+  style: {
+    font-size: 28
+    bold: true
+  }
+}
+
+# Users
+operators: {
+  label: Operators
+  shape: person
+  style.multiple: true
+  width: 120
+}
+
+# LLM Providers
+llm_providers: {
+  shape: cloud
+  style: {
+    fill: "#4a90d9"
+    stroke: "#2c5f8a"
+    font-color: white
+  }
+
+  groq: {
+    label: Groq Cloud\nLlama 3.3 70B
+    shape: hexagon
+    style: {
+      fill: "#f5a623"
+      stroke: "#c7841c"
+      font-color: "#333"
+    }
+  }
+
+  deepseek: {
+    label: DeepSeek\ndeepseek-chat
+    shape: hexagon
+    style: {
+      fill: "#7b68ee"
+      stroke: "#5a4fcf"
+      font-color: white
+    }
+  }
+}
+
+# Agent Nodes
+nodes: {
+
+  laptop1: {
+    label: Laptop 1\nPrimary
+    shape: rectangle
+    style: {
+      fill: "#27ae60"
+      stroke: "#1e8449"
+      font-color: white
+      font-size: 16
+      bold: true
+      border-radius: 8
+    }
+
+    powershell1: {
+      label: PowerShell 5.1
+      shape: cylinder
+      style: {
+        fill: "#012456"
+        stroke: "#0078d4"
+        font-color: white
+      }
+    }
+
+    guardrails1: {
+      label: Guardrails
+      shape: diamond
+      style: {
+        fill: "#e74c3c"
+        stroke: "#c0392b"
+        font-color: white
+      }
+    }
+
+    modules1: {
+      label: 19 PS Modules\nPSFzf, posh-git\noh-my-posh, Carbon...
+      shape: callout
+      style: {
+        fill: "#ffeaa7"
+        stroke: "#fdcb6e"
+        font-color: "#333"
+      }
+    }
+
+    bootstrap1: {
+      label: bootstrap_awesome_ps.ps1
+      shape: page
+      style: {
+        fill: "#dfe6e9"
+        stroke: "#b2bec3"
+      }
+    }
+
+    powershell1 <-> guardrails1: {
+      label: validate
+    }
+    bootstrap1 -> modules1: installs
+    modules1 -> powershell1: extends
+  }
+
+  laptop2: {
+    label: Laptop 2\nFailover
+    shape: rectangle
+    style: {
+      fill: "#27ae60"
+      stroke: "#1e8449"
+      font-color: white
+      font-size: 16
+      bold: true
+      border-radius: 8
+    }
+
+    powershell2: {
+      label: PowerShell 5.1
+      shape: cylinder
+      style: {
+        fill: "#012456"
+        stroke: "#0078d4"
+        font-color: white
+      }
+    }
+
+    guardrails2: {
+      label: Guardrails
+      shape: diamond
+      style: {
+        fill: "#e74c3c"
+        stroke: "#c0392b"
+        font-color: white
+      }
+    }
+
+    bootstrap2: {
+      label: bootstrap_awesome_ps.ps1
+      shape: page
+      style: {
+        fill: "#dfe6e9"
+        stroke: "#b2bec3"
+      }
+    }
+
+    powershell2 <-> guardrails2: {
+      label: validate
+    }
+    bootstrap2 -> powershell2: extends
+  }
+
+  macserver: {
+    label: Mac Server
+    shape: rectangle
+    style: {
+      fill: "#2980b9"
+      stroke: "#1f6fa3"
+      font-color: white
+      font-size: 16
+      bold: true
+      border-radius: 8
+    }
+
+    bash: {
+      label: Bash
+      shape: cylinder
+      style: {
+        fill: "#2d2d2d"
+        stroke: "#555"
+        font-color: white
+      }
+    }
+
+    guardrails3: {
+      label: Guardrails
+      shape: diamond
+      style: {
+        fill: "#e74c3c"
+        stroke: "#c0392b"
+        font-color: white
+      }
+    }
+
+    bash <-> guardrails3: {
+      label: validate
+    }
+  }
+}
+
+# Connections
+operators -> laptop1.powershell1: {
+  label: natural language
+  style.stroke-dash: 3
+}
+operators -> laptop2.powershell2: {
+  label: natural language
+  style.stroke-dash: 3
+}
+operators -> macserver.bash: {
+  label: natural language
+  style.stroke-dash: 3
+}
+
+laptop1.guardrails1 -> llm_providers.groq: {
+  label: OpenAI SDK\napi.groq.com
+}
+laptop2.guardrails2 -> llm_providers.groq: {
+  label: OpenAI SDK\napi.groq.com
+}
+macserver.guardrails3 -> llm_providers.deepseek: {
+  label: OpenAI SDK\napi.deepseek.com
+}
+
+# Config
+config: {
+  label: config.yaml
+  shape: document
+  style: {
+    fill: "#f8f9fa"
+    stroke: "#adb5bd"
+  }
+
+  keys: {
+    label: api_key, model\nbase_url, agent_id\nshell type
+    shape: text
+    style: {
+      font-size: 12
+      font-color: "#666"
+    }
+  }
+}
+
+config -> laptop1: config
+config -> laptop2: config
+config -> macserver: config
+
+# Code Repos
+repos: {
+  label: Git Repos (Private)
+  shape: oval
+  style: {
+    fill: "#6c5ce7"
+    stroke: "#5a4bd1"
+    font-color: white
+  }
+
+  github: {
+    label: GitHub
+    shape: hexagon
+    style: {
+      fill: "#24292f"
+      stroke: "#555"
+      font-color: white
+    }
+  }
+
+  codeberg: {
+    label: Codeberg
+    shape: hexagon
+    style: {
+      fill: "#2185d0"
+      stroke: "#1a6fb5"
+      font-color: white
+    }
+  }
+}
+
+repos.github -> laptop1: git pull
+repos.github -> laptop2: git pull
+repos.codeberg -> macserver: git pull

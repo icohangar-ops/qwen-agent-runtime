@@ -1,0 +1,296 @@
+# HealthGuard AI - Ecosystem Architecture
+# 6 Repos across 3 Git remotes
+# Generated with D2 (https://d2lang.com)
+
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 101
+    pad: 30
+  }
+}
+
+direction: down
+
+# Title
+title: {
+  label: HealthGuard AI\nEcosystem Architecture
+  shape: text
+  style: {
+    font-size: 28
+    bold: true
+  }
+}
+
+# Core Platform
+platform: {
+  label: Core Platform
+  shape: rectangle
+  style: {
+    fill: "#2c3e50"
+    stroke: "#1a252f"
+    font-color: white
+    bold: true
+    font-size: 18
+    border-radius: 8
+    double-border: true
+  }
+
+  backend: {
+    label: Backend API\nPython / FastAPI
+    shape: rectangle
+    style: {
+      fill: "#27ae60"
+      stroke: "#1e8449"
+      font-color: white
+    }
+  }
+
+  frontend: {
+    label: Frontend UI\nReact / Next.js
+    shape: rectangle
+    style: {
+      fill: "#2980b9"
+      stroke: "#1f6fa3"
+      font-color: white
+    }
+  }
+
+  ai_engine: {
+    label: AI Engine\nModel Pipeline
+    shape: cylinder
+    style: {
+      fill: "#8e44ad"
+      stroke: "#7d3c98"
+      font-color: white
+    }
+  }
+
+  database: {
+    label: Database\nPostgreSQL
+    shape: cylinder
+    style: {
+      fill: "#f39c12"
+      stroke: "#d68910"
+      font-color: white
+    }
+  }
+
+  backend -> ai_engine: queries
+  backend -> database: CRUD
+  frontend -> backend: REST API
+}
+
+# Mobile
+mobile: {
+  label: Mobile App
+  shape: rectangle
+  style: {
+    fill: "#16a085"
+    stroke: "#138d75"
+    font-color: white
+    bold: true
+  }
+
+  ios: {
+    label: iOS
+    shape: rectangle
+    style: {
+      fill: "#bbb"
+      stroke: "#999"
+    }
+  }
+
+  android: {
+    label: Android
+    shape: rectangle
+    style: {
+      fill: "#a4c639"
+      stroke: "#7fa52e"
+      font-color: white
+    }
+  }
+}
+
+mobile -> platform.backend: API calls
+
+# Monitoring
+monitoring: {
+  label: Monitoring\nand SIEM
+  shape: hexagon
+  style: {
+    fill: "#e74c3c"
+    stroke: "#c0392b"
+    font-color: white
+    bold: true
+  }
+
+  logs: {
+    label: Log Aggregation
+    shape: cylinder
+    style: {
+      fill: "#e67e22"
+      stroke: "#d35400"
+      font-color: white
+    }
+  }
+
+  alerts: {
+    label: Alert Rules\nThresholds
+    shape: document
+    style: {
+      fill: "#fadbd8"
+      stroke: "#e74c3c"
+    }
+  }
+}
+
+platform.backend -> monitoring: telemetry
+monitoring.logs -> monitoring.alerts: triggers
+
+# DevOps
+devops: {
+  label: DevOps\nInfrastructure
+  shape: rectangle
+  style: {
+    fill: "#34495e"
+    stroke: "#2c3e50"
+    font-color: white
+    bold: true
+  }
+
+  cicd: {
+    label: CI/CD Pipeline\nGitHub Actions
+    shape: rectangle
+    style: {
+      fill: "#24292f"
+      stroke: "#555"
+      font-color: white
+    }
+  }
+
+  containers: {
+    label: Containers\nDocker / K8s
+    shape: rectangle
+    style: {
+      fill: "#2496ed"
+      stroke: "#1a7fd4"
+      font-color: white
+    }
+  }
+
+  security: {
+    label: Security Scanner\nDependency Audit
+    shape: rectangle
+    style: {
+      fill: "#c0392b"
+      stroke: "#a93226"
+      font-color: white
+    }
+  }
+}
+
+devops.cicd -> devops.containers: deploys
+devops.security -> devops.cicd: scans
+
+# Knowledge Base
+knowledge: {
+  label: Senso.AI\nKnowledge Base
+  shape: cloud
+  style: {
+    fill: "#6c5ce7"
+    stroke: "#5a4bd1"
+    font-color: white
+    bold: true
+  }
+
+  docs: {
+    label: 15 Repos\nDocumentation
+    shape: rectangle
+    style: {
+      fill: "#a29bfe"
+      stroke: "#6c5ce7"
+      font-color: white
+    }
+  }
+
+  search: {
+    label: Semantic Search\nEmbeddings
+    shape: cylinder
+    style: {
+      fill: "#fd79a8"
+      stroke: "#e84393"
+      font-color: white
+    }
+  }
+}
+
+knowledge.search -> knowledge.docs: indexes
+platform.backend -> knowledge: queries
+
+# Users
+users: {
+  label: End Users
+  shape: person
+  style.multiple: true
+  width: 100
+}
+
+admins: {
+  label: Admins\nDevOps Team
+  shape: person
+  style.multiple: true
+  width: 100
+}
+
+users -> platform.frontend: uses
+users -> mobile: uses
+admins -> platform.backend: manages
+admins -> monitoring: monitors
+admins -> devops: operates
+
+# Git Remotes
+remotes: {
+  label: Git Infrastructure
+  shape: rectangle
+  style: {
+    fill: "#636e72"
+    stroke: "#2d3436"
+    font-color: white
+    bold: true
+  }
+
+  gh1: {
+    label: GitHub\nCubiczan
+    shape: hexagon
+    style: {
+      fill: "#24292f"
+      stroke: "#555"
+      font-color: white
+    }
+  }
+
+  gh2: {
+    label: GitHub\nzan-maker
+    shape: hexagon
+    style: {
+      fill: "#24292f"
+      stroke: "#555"
+      font-color: white
+    }
+  }
+
+  cb: {
+    label: Codeberg\ncubiczan
+    shape: hexagon
+    style: {
+      fill: "#2185d0"
+      stroke: "#1a6fb5"
+      font-color: white
+    }
+  }
+}
+
+remotes.gh1 -> devops.cicd: push triggers
+remotes.gh2 -> devops.cicd: mirror
+remotes.cb -> knowledge.docs: hosts

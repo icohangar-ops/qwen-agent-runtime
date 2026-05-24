@@ -1,0 +1,187 @@
+# Senso Agent Runtime - Chat Loop Flow
+# Generated with D2 (https://d2lang.com)
+
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 3
+    pad: 40
+  }
+}
+
+direction: down
+
+start: {
+  label: User Input
+  shape: oval
+  style: {
+    fill: "#27ae60"
+    stroke: "#1e8449"
+    font-color: white
+    bold: true
+    font-size: 16
+  }
+}
+
+parse: {
+  label: Read prompt\nfrom stdin
+  shape: rectangle
+  style: {
+    fill: "#3498db"
+    stroke: "#2980b9"
+    font-color: white
+  }
+}
+
+quit_check: {
+  label: Is input\n"quit"?
+  shape: diamond
+  style: {
+    fill: "#f39c12"
+    stroke: "#e67e22"
+    font-color: white
+  }
+}
+
+llm_call: {
+  label: Send to LLM\nOpenAI SDK\n(config.yaml)
+  shape: rectangle
+  style: {
+    fill: "#9b59b6"
+    stroke: "#8e44ad"
+    font-color: white
+  }
+}
+
+guardrails_check: {
+  label: Guardrails\nDeny-list\nRegex patterns
+  shape: diamond
+  style: {
+    fill: "#e74c3c"
+    stroke: "#c0392b"
+    font-color: white
+  }
+}
+
+blocked: {
+  label: BLOCKED\nDangerous command\ndetected
+  shape: rectangle
+  style: {
+    fill: "#c0392b"
+    stroke: "#a93226"
+    font-color: white
+    bold: true
+  }
+}
+
+display_cmd: {
+  label: Display command\nto operator
+  shape: rectangle
+  style: {
+    fill: "#3498db"
+    stroke: "#2980b9"
+    font-color: white
+  }
+}
+
+approve: {
+  label: Approve?\nY / N / E
+  shape: diamond
+  style: {
+    fill: "#f39c12"
+    stroke: "#e67e22"
+    font-color: white
+  }
+}
+
+execute: {
+  label: Execute command\nsubprocess.run()
+  shape: rectangle
+  style: {
+    fill: "#1abc9c"
+    stroke: "#16a085"
+    font-color: white
+  }
+}
+
+truncate: {
+  label: Truncate output\nMAX = 8000 chars\n(Groq 413 fix)
+  shape: rectangle
+  style: {
+    fill: "#e67e22"
+    stroke: "#d35400"
+    font-color: white
+  }
+}
+
+analyze: {
+  label: LLM analyzes\noutput
+  shape: rectangle
+  style: {
+    fill: "#9b59b6"
+    stroke: "#8e44ad"
+    font-color: white
+  }
+}
+
+display_result: {
+  label: Display\nanalysis to user
+  shape: rectangle
+  style: {
+    fill: "#2ecc71"
+    stroke: "#27ae60"
+    font-color: white
+  }
+}
+
+end: {
+  label: Loop back\nfor next input
+  shape: oval
+  style: {
+    fill: "#27ae60"
+    stroke: "#1e8449"
+    font-color: white
+    bold: true
+  }
+}
+
+exit: {
+  label: Exit Agent
+  shape: oval
+  style: {
+    fill: "#95a5a6"
+    stroke: "#7f8c8d"
+    font-color: white
+    bold: true
+  }
+}
+
+rejected: {
+  label: Rejected\nRe-prompt LLM
+  shape: rectangle
+  style: {
+    fill: "#e74c3c"
+    stroke: "#c0392b"
+    font-color: white
+  }
+}
+
+# Flow connections
+start -> parse
+parse -> quit_check
+quit_check -> exit: "yes"
+quit_check -> llm_call: "no"
+llm_call -> guardrails_check
+guardrails_check -> blocked: "match"
+guardrails_check -> display_cmd: "pass"
+blocked -> display_result: "warn user"
+display_cmd -> approve
+approve -> execute: "Y"
+approve -> rejected: "N"
+approve -> execute: "E\n(edit)"
+rejected -> llm_call: "retry"
+execute -> truncate
+truncate -> analyze
+analyze -> display_result
+display_result -> end
+end -> parse
