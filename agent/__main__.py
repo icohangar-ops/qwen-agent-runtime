@@ -61,14 +61,14 @@ def load_config() -> dict:
 
 
 def create_llm(config: dict):
-    """Create the LangChain Chat model connected to Qwen via OpenAI-compatible API."""
+    """Create the LLM via langchain-openai (works with Groq, OpenAI, DeepSeek, etc.)."""
     from langchain_openai import ChatOpenAI
 
     llm_cfg = config.get("llm", {}).get("backup", {})
     return ChatOpenAI(
-        model=llm_cfg.get("model", "qwen2.5-72b-instruct"),
+        model=llm_cfg.get("model", "llama-3.3-70b-versatile"),
         api_key=llm_cfg.get("api_key", ""),
-        base_url=llm_cfg.get("base_url", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
+        base_url=llm_cfg.get("base_url", "https://api.groq.com/openai/v1"),
         temperature=0.1,
         max_tokens=2048,
     )
