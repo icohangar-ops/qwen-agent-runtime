@@ -3,7 +3,7 @@
 llm:
   backup:
     type: "groq"
-    api_key: "sk-06b80f4473e24ab8a1725dd373b27e2d"
+    api_key: ""  # set in local config.yaml (gitignored); see config.example.yaml
     model: "deepseek-chat"
     base_url: "https://api.deepseek.com/v1"
 
