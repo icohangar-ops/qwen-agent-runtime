@@ -14,6 +14,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
+from cubiczan_resilience import resilient
+
 from agent.executor import ShellResult, execute
 from guardrails.whitelist import WhitelistEngine
 from guardrails.approval import ApprovalUI
@@ -22,6 +24,11 @@ from guardrails.sanitizer import OutputSanitizer
 from siem.audit_logger import AuditLogger
 
 console = Console()
+
+# Per-request LLM timeout (seconds) — caps any single network call so a hung
+# upstream cannot stall the agent indefinitely. Mirrors the README's
+# "Timeout" guardrail for the LLM layer.
+LLM_REQUEST_TIMEOUT = 60.0
 
 BANNER = r"""
 [bold cyan]
@@ -71,7 +78,23 @@ def create_llm(config: dict):
         base_url=llm_cfg.get("base_url", "https://api.groq.com/openai/v1"),
         temperature=0.1,
         max_tokens=2048,
+        # Cap each underlying httpx request so a hung backend cannot block
+        # forever; the @resilient wrapper around invoke() adds retry/backoff.
+        request_timeout=LLM_REQUEST_TIMEOUT,
+        max_retries=0,  # retries are handled by @resilient, not langchain
     )
+
+
+@resilient(timeout=LLM_REQUEST_TIMEOUT, max_attempts=3)
+def invoke_llm(llm, messages):
+    """Invoke the LLM with a hard timeout and exponential backoff retry.
+
+    Wraps langchain's blocking ``llm.invoke`` so a slow or hung upstream is
+    bounded (timeout) and transient failures are retried with backoff+jitter
+    before surfacing to the caller. This is the LLM-layer equivalent of the
+    timeout guardrail enforced on shell execution.
+    """
+    return llm.invoke(messages)
 
 
 def parse_commands(response: str) -> list[str]:
@@ -270,7 +293,7 @@ def chat_loop():
         messages.append({"role": "user", "content": user_input})
 
         try:
-            response = llm.invoke(messages)
+            response = invoke_llm(llm, messages)
             ai_text = response.content
         except Exception as e:
             console.print(f"  [red]LLM Error:[/red] {e}")
@@ -310,7 +333,7 @@ def chat_loop():
             })
 
             try:
-                analysis = llm.invoke(messages)
+                analysis = invoke_llm(llm, messages)
                 console.print(f"\n[bold magenta]Senso >[/bold magenta] {analysis.content}")
                 messages.append({"role": "assistant", "content": analysis.content})
             except Exception as e:
