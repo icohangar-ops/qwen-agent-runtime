@@ -65,7 +65,7 @@ notepad config/config.yaml
 
 ### 3. Run
 ```powershell
-python -m agent_runtime.main
+python -m agent
 ```
 
 ## Configuration
@@ -234,36 +234,34 @@ agent:
 
 ```
 qwen-agent-runtime/
-├── agent_runtime/
+├── agent/
 │   ├── __init__.py
-│   ├── main.py              # CLI entry point
-│   ├── executor.py          # Shell command executor
-│   ├── llm_router.py        # Primary/backup LLM switching
-│   └── models.py            # Data models
+│   ├── __main__.py          # CLI entry point (python -m agent)
+│   └── executor.py          # Shell command executor
 ├── guardrails/
 │   ├── __init__.py
 │   ├── whitelist.py         # Command whitelist engine
 │   ├── sanitizer.py         # Input/output sanitization
-│   ├── approval.py          # Human-in-the-loop UI
+│   ├── approval.py          # Human-in-the-loop approval UI
 │   └── timeout.py           # Execution timeout handler
 ├── siem/
 │   ├── __init__.py
-│   ├── audit_logger.py      # Structured JSON audit logging
-│   └── syslog_forwarder.py  # Optional syslog integration
+│   └── audit_logger.py      # Structured JSON audit logging (+ optional syslog)
 ├── config/
-│   ├── config.example.yaml  # Example configuration
-│   └── config.yaml          # Your config (gitignored)
+│   ├── config.example.yaml  # Example configuration (copy to config.yaml)
+│   └── config.yaml          # Your local config (gitignored)
+├── db/
+│   └── schemas/             # SurrealDB multi-model schemas
+├── docs/
+│   └── diagrams/            # D2 architecture diagrams (.d2/.svg/.png)
 ├── scripts/
-│   ├── setup_windows.ps1    # Windows one-shot setup
-│   └── install.ps1          # Dependency installer
+│   ├── setup_windows.ps1    # Windows setup helper
+│   └── bootstrap_awesome_ps.ps1
 ├── tests/
-│   ├── test_whitelist.py
-│   ├── test_sanitizer.py
-│   └── test_executor.py
+│   └── test_guardrails.py   # Whitelist, sanitizer, approval tests
 ├── requirements.txt
 ├── pyproject.toml
-├── CLAUDE.md
-└── LICENSE
+└── README.md
 ```
 
 ## License
