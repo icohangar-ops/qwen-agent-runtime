@@ -49,7 +49,7 @@ class AuditLogger:
         """Try to load syslog config from config.yaml."""
         try:
             import yaml
-            config_path = Path(__file__).parent.parent.parent / "config" / "config.yaml"
+            config_path = Path(__file__).parent.parent / "config" / "config.yaml"
             if config_path.exists():
                 with open(config_path) as f:
                     raw = yaml.safe_load(f)
