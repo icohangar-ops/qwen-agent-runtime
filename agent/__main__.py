@@ -16,7 +16,6 @@ from rich.text import Text
 
 from cubiczan_resilience import resilient
 
-from agent.executor import ShellResult, execute
 from guardrails.whitelist import WhitelistEngine
 from guardrails.approval import ApprovalUI
 from guardrails.timeout import run_with_timeout

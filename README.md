@@ -1,6 +1,6 @@
 # Senso Agent Runtime — Qwen-Powered Local Execution
 
-> Secure local agent runtime using **LangChain ShellTool** with Qwen 2.5/3 as cloud-hosted backup LLM. Executes AI-suggested commands on Windows with built-in safety guardrails, human-in-the-loop approval, and SIEM audit logging.
+> Secure local agent runtime using **LangChain** with a cloud-hosted, OpenAI-compatible LLM (Qwen 2.5/3 via DashScope by default; Groq or DeepSeek also supported). Executes AI-suggested commands on Windows with built-in safety guardrails, human-in-the-loop approval, and SIEM audit logging.
 
 ---
 
@@ -11,11 +11,11 @@
 │                    Senso Agent Runtime                           │
 │                                                                 │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐   │
-│  │  LLM Router  │───▶│  Guardrails  │───▶│  Shell Executor  │   │
-│  │              │    │              │    │                  │   │
-│  │ Primary: zAI │    │ ✓ Whitelist  │    │ subprocess.run() │   │
-│  │ Backup: Qwen │    │ ✓ Timeout    │    │                  │   │
-│  │              │    │ ✓ Sanitize   │    └────────┬─────────┘   │
+│  │  LLM Client  │───▶│  Guardrails  │───▶│  Shell Executor  │   │
+│  │  (OpenAI-    │    │              │    │                  │   │
+│  │  compatible) │    │ ✓ Whitelist  │    │ subprocess.run() │   │
+│  │  Qwen/Groq/  │    │ ✓ Timeout    │    │                  │   │
+│  │  DeepSeek    │    │ ✓ Sanitize   │    └────────┬─────────┘   │
 │  └──────────────┘    │ ✓ Approval   │             │              │
 │                      └──────────────┘             │              │
 │  ┌──────────────┐                                  │              │
@@ -34,7 +34,7 @@
 
 ## Features
 
-- **Dual LLM**: Primary (z-ai-web-dev-sdk) + Backup (Qwen 2.5/3 via Alibaba DashScope API)
+- **OpenAI-compatible LLM**: Uses `langchain-openai` against any OpenAI-compatible endpoint — Qwen 2.5/3 via Alibaba DashScope, Groq, or DeepSeek (configurable `base_url` and `model`)
 - **Command Whitelist**: Regex-based allow/deny lists for commands, paths, and arguments
 - **Timeout Enforcement**: Per-command configurable timeouts with automatic kill
 - **Output Sanitization**: Strips secrets, PII, and sensitive paths from output
@@ -73,14 +73,13 @@ python -m agent
 ```yaml
 # config/config.yaml
 llm:
-  primary:
-    type: "zai"
-    # Uses z-ai-web-dev-sdk (auto-configured)
   backup:
     type: "qwen"
     api_key: "sk-your-dashscope-key"
     model: "qwen2.5-72b-instruct"  # or qwen3-6b
-    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    base_url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    # Point base_url/model at Groq or DeepSeek to use a different
+    # OpenAI-compatible provider.
 
 guardrails:
   command_whitelist:
@@ -150,19 +149,24 @@ siem:
 
 ## LLM Providers
 
-### Qwen 2.5/3 (Backup — Alibaba DashScope)
+The runtime talks to any OpenAI-compatible chat endpoint through `langchain-openai`.
+Set `base_url` and `model` for the provider you want.
+
+### Qwen 2.5/3 (Alibaba DashScope)
 ```yaml
 backup:
   type: "qwen"
   api_key: "sk-your-dashscope-key"
   model: "qwen2.5-72b-instruct"
-  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  base_url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 ```
 
 Get your API key: https://dashscope.console.aliyun.com/apiKey
 
-### z-ai-web-dev-sdk (Primary)
-Uses the installed `z-ai-web-dev-sdk` package. No additional configuration needed.
+### Groq / DeepSeek (alternative)
+Point `base_url` and `model` at the provider (for example
+`https://api.groq.com/openai/v1` with `llama-3.3-70b-versatile`) and supply the
+matching `api_key`.
 
 ## Safety Model
 

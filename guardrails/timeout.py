@@ -5,8 +5,6 @@ Kills process tree on timeout.
 from __future__ import annotations
 
 import subprocess
-import time
-import threading
 import signal
 import platform
 from agent.executor import ShellResult
