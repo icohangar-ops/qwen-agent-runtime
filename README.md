@@ -39,6 +39,7 @@
 - **Timeout Enforcement**: Per-command configurable timeouts with automatic kill
 - **Output Sanitization**: Strips secrets, PII, and sensitive paths from output
 - **Human-in-the-Loop**: Terminal-based approval UI — confirm, modify, or reject commands
+- **Daytona sandbox (optional)**: Set `DAYTONA_API_KEY` to run approved commands in an isolated Linux VM instead of the host shell
 - **SIEM Integration**: Structured JSON logging, optional syslog forwarding
 - **Windows Ready**: PowerShell and CMD support, execution policy config, Defender guidance
 
@@ -61,6 +62,7 @@ pip install -r requirements.txt
 cp config/config.example.yaml config/config.yaml
 notepad config/config.yaml
 # Add your Qwen API key and configure guardrails
+# Optional: export DAYTONA_API_KEY=... to route execution through Daytona sandboxes
 ```
 
 ### 3. Run

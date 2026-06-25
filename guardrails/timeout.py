@@ -8,6 +8,7 @@ import subprocess
 import signal
 import platform
 from agent.executor import ShellResult
+from agent.daytona_runtime import DaytonaSession, execute_in_sandbox
 
 
 def run_with_timeout(
@@ -15,8 +16,12 @@ def run_with_timeout(
     timeout: int = 30,
     shell: str = "powershell",
     cwd: str | None = None,
+    config: dict | None = None,
 ) -> ShellResult:
     """Execute command with a hard timeout. Raises TimeoutError if exceeded."""
+    if DaytonaSession.enabled(config):
+        return execute_in_sandbox(command, shell=shell, cwd=cwd, timeout=timeout, config=config)
+
     is_win = platform.system() == "Windows"
 
     if shell == "powershell":

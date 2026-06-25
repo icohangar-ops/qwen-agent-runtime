@@ -16,6 +16,12 @@ agent:
 
 shell: "powershell"          # "powershell" | "cmd" | "bash"
 
+# Daytona sandbox execution (optional)
+# When enabled (or DAYTONA_API_KEY is set), approved commands run in an isolated VM.
+daytona:
+  enabled: false             # set true or export DAYTONA_API_KEY
+  shell: "bash"              # sandbox shell (Daytona VMs are Linux)
+
 limits:
   max_turns: 20              # Max command rounds per user query
   max_command_length: 2000

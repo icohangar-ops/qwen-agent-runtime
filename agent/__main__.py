@@ -16,6 +16,7 @@ from rich.text import Text
 
 from cubiczan_resilience import resilient
 
+from agent.daytona_runtime import DaytonaSession
 from guardrails.whitelist import WhitelistEngine
 from guardrails.approval import ApprovalUI
 from guardrails.timeout import run_with_timeout
@@ -129,6 +130,7 @@ def run_command(
     logger: AuditLogger,
     shell: str,
     max_cmd_len: int,
+    config: dict | None = None,
 ) -> tuple[bool, str]:
     """
     Run a single command through the full guardrail pipeline.
@@ -169,7 +171,7 @@ def run_command(
     console.print(f"  [dim]Executing (timeout: {timeout}s)...[/dim]")
 
     try:
-        result = run_with_timeout(final_cmd, timeout=timeout, shell=shell)
+        result = run_with_timeout(final_cmd, timeout=timeout, shell=shell, config=config)
     except TimeoutError as e:
         msg = str(e)
         console.print(f"  [red]TIMEOUT:[/red] {msg}")
@@ -225,7 +227,9 @@ def chat_loop():
     console.print(f"  Agent ID: [bold]{agent_id}[/bold]")
     console.print(f"  Shell:    [bold]{shell}[/bold]")
     console.print(f"  Model:    [bold]{config.get('llm', {}).get('backup', {}).get('model', 'qwen2.5-72b-instruct')}[/bold]")
-    console.print(f"  Guardrails: [green]active[/green] | SIEM: [green]logging[/green]")
+    daytona_on = DaytonaSession.enabled(config)
+    exec_mode = "[cyan]Daytona sandbox[/cyan]" if daytona_on else "[green]local subprocess[/green]"
+    console.print(f"  Guardrails: [green]active[/green] | Exec: {exec_mode} | SIEM: [green]logging[/green]")
     console.print(f"\n  Type [bold]quit[/bold] or [bold]exit[/bold] to stop. Type [bold]help[/bold] for commands.\n")
 
     logger.log("agent_started", {"shell": shell, "model": config.get("llm", {}).get("backup", {}).get("model")})
@@ -239,6 +243,7 @@ def chat_loop():
         except (EOFError, KeyboardInterrupt):
             console.print("\n[yellow]Goodbye![/yellow]")
             logger.log("agent_stopped", {"reason": "user_interrupt"})
+            DaytonaSession.cleanup()
             logger.close()
             break
 
@@ -248,6 +253,7 @@ def chat_loop():
         if user_input.lower() in ("quit", "exit", "q"):
             console.print("[yellow]Goodbye![/yellow]")
             logger.log("agent_stopped", {"reason": "user_quit"})
+            DaytonaSession.cleanup()
             logger.close()
             break
 
@@ -272,6 +278,7 @@ def chat_loop():
                 f"Model: {config.get('llm', {}).get('backup', {}).get('model')}\n"
                 f"Conversation turns: {len(messages) - 1}\n"
                 f"Guardrails: active\n"
+                f"Execution: {'Daytona sandbox' if DaytonaSession.enabled(config) else 'local subprocess'}\n"
                 f"SIEM log: {log_file}",
                 title="Agent Status", border_style="cyan"
             ))
@@ -316,7 +323,7 @@ def chat_loop():
                 break
 
             success, output = run_command(
-                cmd, whitelist, approval, sanitizer, logger, shell, max_cmd_len
+                cmd, whitelist, approval, sanitizer, logger, shell, max_cmd_len, config
             )
             all_output += f"\n[{cmd}]\nExit code: {0 if success else 'non-zero'}\n{output}\n"
             turn_count += 1

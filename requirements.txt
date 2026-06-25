@@ -6,3 +6,4 @@ pyyaml>=6.0
 rich>=13.0
 prompt-toolkit>=3.0
 cubiczan-resilience @ git+https://github.com/icohangar-ops/cubiczan-resilience.git#subdirectory=python
+daytona>=0.1.0
